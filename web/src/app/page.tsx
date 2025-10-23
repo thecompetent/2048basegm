@@ -3,15 +3,18 @@ import { useEffect, useMemo, useState } from "react";
 import { RainbowKitProvider, getDefaultWallets, ConnectButton } from "@rainbow-me/rainbowkit";
 import "@rainbow-me/rainbowkit/styles.css";
 import { WagmiConfig, configureChains, createConfig } from "wagmi";
-import { base } from "wagmi/chains";
+import { base, baseSepolia } from "wagmi/chains";
 import { http } from "viem";
 import Game2048 from "@/components/Game2048";
 
 const rpcUrl = process.env.NEXT_PUBLIC_BASE_RPC || "https://mainnet.base.org";
 
 export default function Home() {
-  const { chains, publicClient } = useMemo(() =>
-    configureChains([base], [http(rpcUrl)]), []);
+  const { chains, publicClient } = useMemo(() => {
+    const chainIdStr = process.env.NEXT_PUBLIC_CHAIN_ID || "8453";
+    const chain = chainIdStr === "84532" ? baseSepolia : base;
+    return configureChains([chain], [http(rpcUrl)]);
+  }, []);
 
   const { connectors } = getDefaultWallets({ appName: "2048basegm", chains });
   const config = useMemo(() => createConfig({ autoConnect: true, connectors, publicClient }), [connectors, publicClient]);
@@ -43,4 +46,3 @@ export default function Home() {
     </WagmiConfig>
   );
 }
-

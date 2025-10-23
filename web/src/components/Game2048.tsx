@@ -125,8 +125,10 @@ export default function Game2048() {
       const { claim, signature, contractAddress } = await res.json();
       // client sends transaction via viem public client (optional: wagmi action)
       const { createWalletClient, custom, parseAbi, getContract } = await import("viem");
-      const { base } = await import("wagmi/chains");
-      const client = createWalletClient({ chain: base, transport: custom((window as any).ethereum) });
+      const { base, baseSepolia } = await import("viem/chains");
+      const chainIdStr = process.env.NEXT_PUBLIC_CHAIN_ID || "8453";
+      const chain = chainIdStr === "84532" ? baseSepolia : base;
+      const client = createWalletClient({ chain, transport: custom((window as any).ethereum) });
       const abi = parseAbi([
         "function claimGm((address wallet,uint256 score,uint256 validUntil,uint64 day) c, bytes sig)",
       ]);
@@ -171,4 +173,3 @@ export default function Game2048() {
     </div>
   );
 }
-

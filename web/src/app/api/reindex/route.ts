@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { kv } from "@vercel/kv";
 import { createPublicClient, http, parseAbiItem, Address } from "viem";
-import { base } from "viem/chains";
+import { base, baseSepolia } from "viem/chains";
 
 export const dynamic = "force-dynamic";
 
@@ -12,7 +12,9 @@ export async function POST(req: NextRequest) {
   const fromBlockStr = (await kv.get<string>("fromBlock")) ?? "0";
   const fromBlock = BigInt(fromBlockStr);
 
-  const client = createPublicClient({ chain: base, transport: http(process.env.NEXT_PUBLIC_BASE_RPC) });
+  const chainIdStr = process.env.NEXT_PUBLIC_CHAIN_ID || "8453";
+  const chain = chainIdStr === "84532" ? baseSepolia : base;
+  const client = createPublicClient({ chain, transport: http(process.env.NEXT_PUBLIC_BASE_RPC) });
   const latest = await client.getBlockNumber();
 
   const logs = await client.getLogs({
@@ -30,4 +32,3 @@ export async function POST(req: NextRequest) {
   await kv.set("fromBlock", latest.toString());
   return NextResponse.json({ ok: true, processed: logs.length, upTo: latest.toString() });
 }
-

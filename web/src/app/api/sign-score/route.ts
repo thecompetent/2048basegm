@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Address, Hex, createWalletClient, http, parseAbiParameters, encodeAbiParameters } from "viem";
-import { base } from "viem/chains";
+import { Address, Hex, createWalletClient, http } from "viem";
+import { base, baseSepolia } from "viem/chains";
 
 export const dynamic = "force-dynamic";
 
@@ -32,7 +32,10 @@ export async function POST(req: NextRequest) {
   const validUntil = nowSec + 10 * 60; // 10 minutes
 
   // We'll sign the EIP-191 hash of EIP712-encodable data off-chain using viem wallet client
-  const client = createWalletClient({ chain: base, transport: http() }).extend((c) => ({
+  const chainIdStr = process.env.NEXT_PUBLIC_CHAIN_ID || "8453"; // 8453=base, 84532=baseSepolia
+  const chain = chainIdStr === "84532" ? baseSepolia : base;
+  const rpcUrl = process.env.NEXT_PUBLIC_BASE_RPC; // optional; falls back to default
+  const client = createWalletClient({ chain, transport: http(rpcUrl) }).extend((c) => ({
     async signTyped({ pk, domain, types, message }: any) {
       const { privateKeyToAccount } = await import("viem/accounts");
       const account = privateKeyToAccount(pk);
@@ -40,7 +43,7 @@ export async function POST(req: NextRequest) {
     }
   }));
 
-  const domain = { name: "GmManager", version: "1", chainId: 8453, verifyingContract: contractAddress };
+  const domain = { name: "GmManager", version: "1", chainId: Number(chainIdStr), verifyingContract: contractAddress };
   const types = {
     ScoreClaim: [
       { name: "wallet", type: "address" },
@@ -56,4 +59,3 @@ export async function POST(req: NextRequest) {
 
   return NextResponse.json({ claim: { ...claim, score: Number(score) }, signature, contractAddress });
 }
-
