@@ -6,14 +6,15 @@ describe("GmManager", function () {
     const [owner, user, signer] = await ethers.getSigners();
     const Gm = await ethers.getContractFactory("GmManager");
     const gm = await Gm.connect(owner).deploy(signer.address);
-    await gm.deployed();
+    await gm.waitForDeployment();
+    const gmAddress = await gm.getAddress();
 
     // helper: sign typed data
     const domain = {
       name: "GmManager",
       version: "1",
       chainId: (await ethers.provider.getNetwork()).chainId,
-      verifyingContract: gm.address,
+      verifyingContract: gmAddress,
     };
 
     const types = {
@@ -35,7 +36,7 @@ describe("GmManager", function () {
       day,
     };
 
-    const sig = await signer._signTypedData(domain, types as any, claim);
+    const sig = await (signer as any).signTypedData(domain as any, types as any, claim);
 
     await expect(gm.connect(user).claimGm(claim, sig)).to.emit(gm, "GmClaimed");
     const total1 = await gm.totalGm(user.address);
@@ -55,7 +56,7 @@ describe("GmManager", function () {
     const day2 = Math.floor(now2 / (24 * 60 * 60));
 
     const claim2 = { ...claim, day: day2, validUntil: now2 + 3600 };
-    const sig2 = await signer._signTypedData(domain, types as any, claim2);
+    const sig2 = await (signer as any).signTypedData(domain as any, types as any, claim2);
 
     await gm.connect(user).claimGm(claim2, sig2);
     const total2 = await gm.totalGm(user.address);
@@ -63,4 +64,3 @@ describe("GmManager", function () {
     expect(total2).to.equal(9);
   });
 });
-

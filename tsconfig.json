@@ -1,14 +1,23 @@
 {
-  "compilerOptions": {
-    "target": "ES2020",
-    "module": "ESNext",
-    "outDir": "./dist",
-    "rootDir": "./",
-    "strict": true,
-    "esModuleInterop": true,
-    "resolveJsonModule": true,
-    "types": ["node", "mocha"],
-    "skipLibCheck": true
-  },
-  "include": ["./scripts", "./test", "./typechain-types", "./hardhat.config.ts"]
+    "compilerOptions":  {
+                            "target":  "ES2020",
+                            "module":  "commonjs",
+                            "outDir":  "./dist",
+                            "rootDir":  "./",
+                            "strict":  true,
+                            "esModuleInterop":  true,
+                            "resolveJsonModule":  true,
+                            "types":  [
+                                          "node",
+                                          "mocha"
+                                      ],
+                            "skipLibCheck":  true,
+                            "moduleResolution":  "node"
+                        },
+    "include":  [
+                    "./scripts",
+                    "./test",
+                    "./typechain-types",
+                    "./hardhat.config.ts"
+                ]
 }

@@ -7,12 +7,12 @@ async function main() {
   console.log(`Deploying GmManager to ${network.name} with signer ${signerAddr}`);
   const Factory = await ethers.getContractFactory("GmManager");
   const gm = await Factory.deploy(signerAddr);
-  await gm.deployed();
-  console.log("GmManager deployed:", gm.address);
+  await gm.waitForDeployment();
+  const addr = await gm.getAddress();
+  console.log("GmManager deployed:", addr);
 }
 
 main().catch((e) => {
   console.error(e);
   process.exit(1);
 });
-
